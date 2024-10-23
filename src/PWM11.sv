@@ -1,5 +1,5 @@
 module PWM11(clk,rst_n,duty,PWM_sig,PWM_sig_n);
-
+// test comment //
 input clk,rst_n;
 input [10:0] duty;
 output reg PWM_sig,PWM_sig_n;
