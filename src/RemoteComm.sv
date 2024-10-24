@@ -5,19 +5,20 @@
 */
 
 `default_nettype none
-module RemoteComm(snd_cmd,cmd,clk,rst_n,TX,RX,cmd_snt,rx_data,rx_rdy);
-
-	input clk,rst_n; //sync inputs 
-	input [15:0] cmd; // data inputs
-	input RX; //for UART when in receiving mode
+module RemoteComm(
+	input clk,    
+	input rst_n,
+	input snd_cmd,
+	input [15:0] cmd, // data inputs
+	input RX, //for UART when in receiving mode
+	output TX, // TX is a single bit being sent.
+	output reg cmd_snt, // cmd_snt asserts high when the entire 16 bits have been transmitted. 
 	
-	//RX outputs 
-	output rx_rdy;
-	output [7:0] rx_data;
-	
-	
-	output reg cmd_snt; // cmd_snt asserts high when the entire 16 bits have been transmitted. 
-	output TX; // TX is a single bit being sent.
+	//rx outputs 
+	output resp_rx_rdy,  
+	output [7:0] resp_rx_data,
+	input resp_clr_rx_rdy
+	);
 	
 
 	logic byte_sel; // if high transmitting cmd[15:8], [7:0] otherwise

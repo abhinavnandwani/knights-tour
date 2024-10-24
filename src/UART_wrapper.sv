@@ -5,21 +5,33 @@
 */
 
 `default_nettype none
-module UART_wrapper(clk,rst_n,RX,TX,rx_rdy,clr_rx_rdy,rx_data,resp_trmt,resp_tx_data,resp_tx_done,clr_cmd_rdy,cmd_rdy);
+module UART_wrapper(
+	input clk, //sync inputs 
+	input rst_n,
+	input RX,
+	output TX,
 
-	input clk,rst_n; //sync inputs 
+	input clr_cmd_rdy, //indicating data is "consumed" by user
+	output cmd_rdy, //flag to indicate the 16 bits are ready to be consumed
+	output [15:0] cmd,
+	
+	input resp_trmt,
+	input [7:0] resp_tx_data,
+	output resp_tx_done
+	);
 
-	input clr_cmd_rdy; //indicating data is "consumed" by user
-	output cmd_rdy; //flag to indicate the 16 bits are ready to be consumed
+
+	output cmd_rdy; 
 	
 	//// response for UART_wrapper to transmit ////
 	input resp_trmt;
 	input [7:0] resp_tx_data;
 	output resp_tx_done;
 	
-	output [15:0] cmd;
+
 	
 	logic byte_mux;
+	logic rx_rdy,clr_rx_rdy;
 	logic [7:0] flopped_byte, bytee;
 	
 	//// instantiate UART ////
