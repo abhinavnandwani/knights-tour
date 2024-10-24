@@ -3,7 +3,7 @@
     Filename        : RemoteComm.sv
     Description     : This module takes a 16-bit command and sends it as two 8-bit bytes over UART 
 */
-//test
+
 `default_nettype none
 module RemoteComm(snd_cmd,cmd,clk,rst_n,TX,RX,cmd_snt,rx_data,rx_rdy);
 
