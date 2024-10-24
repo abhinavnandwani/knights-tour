@@ -1,3 +1,10 @@
+/* 
+    Author          : Abhinav Nandwani
+    Filename        : UART_wrapper.sv
+    Description     : 
+*/
+
+`default_nettype none
 module UART_wrapper(clk,rst_n,RX,TX,rx_rdy,clr_rx_rdy,rx_data,trmt,resp,tx_done,clr_cmd_rdy,cmd_rdy);
 
 	input clk,rst_n,clr_cmd_rdy,trmt;
@@ -37,6 +44,7 @@ module UART_wrapper(clk,rst_n,RX,TX,rx_rdy,clr_rx_rdy,rx_data,trmt,resp,tx_done,
 		cmd_rdy = 0;
 		clr_rx_rdy = 0;
 		byte_mux = 0;
+		nxt_state = state;
 		
 		case (state)
 		
@@ -53,4 +61,5 @@ module UART_wrapper(clk,rst_n,RX,TX,rx_rdy,clr_rx_rdy,rx_data,trmt,resp,tx_done,
 	end
 
 endmodule
+`default_nettype wire
 					

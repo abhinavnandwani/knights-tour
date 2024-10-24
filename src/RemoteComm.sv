@@ -1,3 +1,10 @@
+/* 
+    Author          : Abhinav Nandwani
+    Filename        : RemoteComm.sv
+    Description     : This module takes a 16-bit command and sends it as two 8-bit bytes over UART 
+*/
+
+`default_nettype none
 module RemoteComm(snd_cmd,cmd,clk,rst_n,TX,RX,cmd_snt);
 
 	input clk,rst_n; //sync inputs 
@@ -6,15 +13,21 @@ module RemoteComm(snd_cmd,cmd,clk,rst_n,TX,RX,cmd_snt);
 	
 	
 	
-	output cmd_snt; // cmd_snt asserts high when the entire 16 bits have been transmitted. 
+	output reg cmd_snt; // cmd_snt asserts high when the entire 16 bits have been transmitted. 
 	output TX; // TX is a single bit being sent.
 	
 
 	logic byte_sel; // if high transmitting cmd[15:8], [7:0] otherwise
 	logic trmt; //sent to UART to initiate transmission
-	logic tx_done; //output of UART, indicates completion of a transmission
+
+	logic [7:0] tx_done; //output of UART, indicates completion of a transmission
+	logic [7:0] low_b; // for flop to store low bit 
+
 
 	logic set_cmd_snt;
+
+	assign tx_data = byte_sel ? cmd[15:0] : low_b //if byte_sel high - send high byte
+												   // if byte sel low - send low byte from flop
 	
 	UART_wrapper iUART(
 				   .clk(clk),
@@ -35,31 +48,47 @@ module RemoteComm(snd_cmd,cmd,clk,rst_n,TX,RX,cmd_snt);
 	//// flop for cmd with snd_cmd en ////
 	always_ff@(posedge clk, negedge rst_n)
 		if (!rst_n)
-			cmd_b1 <= 0;
+			low_b <= 0;
 		else if (snd_cmd) //sync en
-			cmd_b1 <= cmd[7:0];
+			low_b <= cmd[7:0];
 	
 	
 	
-	typedef enum reg {BYTE1, BYTE2} state_t;
+	typedef enum reg [1:0]{IDLE, HIGH_BYTE, LOW_BYTE} state_t;
 	state_t state, nxt_state;
 	//// flop for state ////
 	always_ff@(posedge clk, negedge rst_n)
 		if (!rst_n)
-			state <= BYTE1;
+			state <= IDLE;
 		else
 			state <= nxt_state;
 	
 	//// always comb block for next state and output logic ////
 	always_comb begin
 		// default outputs 
-		byte_sel = 1'b0;
+		byte_sel = 1'b1;
 		trmt = 1'b0;
 		set_cmd_snt = 1'b0;
+		nxt_state = state;
+
+
+		// TODO using 3 states for now, please check if can be done in 2.
 
 		case (state)
+			HIGH_BYTE: if(tx_done) begin
+				//byte_sel = 1'b1; //uncommented case byte_sel is default high 
+				trmt = 1'b1;
+				nxt_state = LOW_BYTE;
+			end
+
+			LOW_BYTE: if(tx_done) begin
+				set_cmd_snt = 1'b0;
+				nxt_state = IDLE;
+			end
+
 			// default is BYTE1 //
-			default: begin if(snd_cmd) trmt = 1'b1;
+			default: if(snd_cmd) trmt = 1'b1;
+
 	end
 
 		
@@ -74,6 +103,7 @@ module RemoteComm(snd_cmd,cmd,clk,rst_n,TX,RX,cmd_snt);
 			cmd_snt <= 1'b1;
 		
 	
-	
+endmodule
+`default_nettype wire
 
 	

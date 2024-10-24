@@ -24,7 +24,7 @@ module UART_tb();
 
     always #5 clk = ~clk; //clock generator
 
-    inital begin 
+    initial begin 
     clk = 0;
     rst_n = 0;
     trmt = 0;
@@ -34,18 +34,27 @@ module UART_tb();
     // deassert rst_n //
     @(negedge clk) rst_n = 1'b1;
 
-    for (int i = 0; i<6;i++) begin
+    for (int i = 0; i<4;i++) begin
         @(negedge clk);
         tx_data = test_data[i];
         trmt = 1'b1;
+        @(negedge clk);
+        trmt = 1'b0;
 
         // 2 clk cycles for RX_2ff + 10 clk cycles of trmt
         @(posedge rdy);
-        if (rx_data != test_data[i])
-            $display("rx_data was not valid for data: %d", test_data[i]);
+        if (rx_data != test_data[i]) begin
+            $strobe("rx_data was not valid for data:%d", test_data[i]);
+            $stop();
+        end
+        @(posedge tx_done);
+        
     end
     $display("YAHOO! Test passed ");
+    $stop();
     end
+    
 
 
 
+endmodule
