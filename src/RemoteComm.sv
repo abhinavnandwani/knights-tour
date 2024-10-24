@@ -5,12 +5,15 @@
 */
 
 `default_nettype none
-module RemoteComm(snd_cmd,cmd,clk,rst_n,TX,RX,cmd_snt);
+module RemoteComm(snd_cmd,cmd,clk,rst_n,TX,RX,cmd_snt,rx_data,rx_rdy);
 
 	input clk,rst_n; //sync inputs 
 	input [15:0] cmd; // data inputs
 	input RX; //for UART when in receiving mode
 	
+	//RX outputs 
+	output rx_rdy;
+	output [7:0] rx_data;
 	
 	
 	output reg cmd_snt; // cmd_snt asserts high when the entire 16 bits have been transmitted. 
@@ -20,7 +23,8 @@ module RemoteComm(snd_cmd,cmd,clk,rst_n,TX,RX,cmd_snt);
 	logic byte_sel; // if high transmitting cmd[15:8], [7:0] otherwise
 	logic trmt; //sent to UART to initiate transmission
 
-	logic [7:0] tx_done; //output of UART, indicates completion of a transmission
+	logic tx_done; //output of UART, indicates completion of a transmission
+	logic [7:0] tx_data; // data for the UART to trasnmit
 	logic [7:0] low_b; // for flop to store low bit 
 
 
@@ -29,20 +33,23 @@ module RemoteComm(snd_cmd,cmd,clk,rst_n,TX,RX,cmd_snt);
 	assign tx_data = byte_sel ? cmd[15:0] : low_b //if byte_sel high - send high byte
 												   // if byte sel low - send low byte from flop
 	
-	UART_wrapper iUART(
-				   .clk(clk),
-				   .rst_n(rst_n),
-				   .RX(RX),
-				   .TX(TX),
-				   .rx_rdy(rx_rdy),
-				   .clr_rx_rdy(clr_rx_rdy),
-				   .rx_data(rx_data),
-				   .trmt(trmt),
-				   .resp(resp),
-				   .tx_done(tx_done),
-				   .clr_cmd_rdy(clr_cmd_rdy),
-				   .cmd_rdy(cmd_rdy)
-				 );
+	// UART inputs //
+	
+	
+	
+	
+	UART iUART(
+		.clk(clk),
+		.rst_n(rst_n),
+		.RX(RX),
+		.TX(TX),
+		.rx_rdy(resp_rx_rdy),
+		.clr_rx_rdy(resp_clr_rx_rdy),
+		.rx_data(resp_rx_data),
+		.trmt(trmt),
+		.tx_data(tx_data),
+		.tx_done(tx_done)
+		);
 
 	
 	//// flop for cmd with snd_cmd en ////

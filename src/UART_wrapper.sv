@@ -5,10 +5,17 @@
 */
 
 `default_nettype none
-module UART_wrapper(clk,rst_n,RX,TX,rx_rdy,clr_rx_rdy,rx_data,trmt,resp,tx_done,clr_cmd_rdy,cmd_rdy);
+module UART_wrapper(clk,rst_n,RX,TX,rx_rdy,clr_rx_rdy,rx_data,resp_trmt,resp_tx_data,resp_tx_done,clr_cmd_rdy,cmd_rdy);
 
-	input clk,rst_n,clr_cmd_rdy,trmt;
-	input [7:0] resp;
+	input clk,rst_n; //sync inputs 
+
+	input clr_cmd_rdy; //indicating data is "consumed" by user
+	output cmd_rdy; //flag to indicate the 16 bits are ready to be consumed
+	
+	//// response for UART_wrapper to transmit ////
+	input resp_trmt;
+	input [7:0] resp_tx_data;
+	output resp_tx_done;
 	
 	output [15:0] cmd;
 	
@@ -16,7 +23,17 @@ module UART_wrapper(clk,rst_n,RX,TX,rx_rdy,clr_rx_rdy,rx_data,trmt,resp,tx_done,
 	logic [7:0] flopped_byte, bytee;
 	
 	//// instantiate UART ////
-	UART iUART(.clk(clk),.rst_n(rst_n),.RX(RX),.TX(TX),.rx_rdy(rx_rdy),.clr_rx_rdy(clr_rx_rdy),.rx_data(bytee),.trmt(trmt),.tx_data(resp),.tx_done(tx_done));
+	UART iUART(
+		.clk(clk),
+		.rst_n(rst_n),
+		.RX(RX),.TX(TX),
+		.rx_rdy(rx_rdy),
+		.clr_rx_rdy(clr_rx_rdy),
+		.rx_data(bytee),
+		.trmt(resp_trmt),
+		.tx_data(resp_tx_data),
+		.tx_done(resp_tx_done)
+		);
 	
 	assign cmd = {flopped_byte,bytee};
 	
