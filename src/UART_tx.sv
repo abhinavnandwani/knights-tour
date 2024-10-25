@@ -1,3 +1,12 @@
+/* 
+    Author          : Abhinav Nandwani
+    Filename        : UART_tx.sv
+    Description     : 
+*/
+
+
+
+
 module UART_tx(clk,rst_n,TX,trmt,tx_data,tx_done);
 	
 	//inputs 

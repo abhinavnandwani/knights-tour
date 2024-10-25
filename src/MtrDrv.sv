@@ -1,3 +1,12 @@
+/* 
+    Author          : Abhinav Nandwani
+    Filename        : MtrDrv.sv
+    Description     : 
+*/
+
+
+
+
 module MtrDrv(clk,rst_n,lft_spd,rght_spd,lftPWM1,lftPWM2,rghtPWM1,rghtPWM2);
 
 input signed [10:0] lft_spd,rght_spd;

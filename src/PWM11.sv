@@ -1,3 +1,11 @@
+/* 
+    Author          : Abhinav Nandwani
+    Filename        : PWM11.sv
+    Description     : 
+*/
+
+
+
 module PWM11(clk,rst_n,duty,PWM_sig,PWM_sig_n);
 
 input clk,rst_n;
