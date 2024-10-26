@@ -7,10 +7,10 @@
 `default_nettype none
 module UART_rx(clk,rst_n,RX,rx_data,clr_rdy,rdy);
 
-    input clk, rst_n;
-    input RX, clr_rdy;
-    output [7:0] rx_data;
-    output logic rdy;
+    input logic clk, rst_n;
+    input logic RX, clr_rdy;
+    output logic [7:0] rx_data;
+    output reg rdy;
 
 
     logic [3:0] bit_cnt;

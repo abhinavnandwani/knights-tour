@@ -6,29 +6,19 @@
 
 `default_nettype none
 module UART_wrapper(
-	input clk, //sync inputs 
-	input rst_n,
-	input RX,
-	output TX,
+	input wire clk, //sync inputs 
+	input wire rst_n,
+	input wire RX,
+	output wire TX,
 
-	input clr_cmd_rdy, //indicating data is "consumed" by user
-	output cmd_rdy, //flag to indicate the 16 bits are ready to be consumed
-	output [15:0] cmd,
+	input wire clr_cmd_rdy, //indicating data is "consumed" by user
+	output reg cmd_rdy, //flag to indicate the 16 bits are ready to be consumed
+	output wire [15:0] cmd,
 	
-	input resp_trmt,
-	input [7:0] resp_tx_data,
-	output resp_tx_done
+	input wire resp_trmt,
+	input wire [7:0] resp_tx_data,
+	output wire resp_tx_done
 	);
-
-
-	output cmd_rdy; 
-	
-	//// response for UART_wrapper to transmit ////
-	input resp_trmt;
-	input [7:0] resp_tx_data;
-	output resp_tx_done;
-	
-
 	
 	logic byte_mux;
 	logic rx_rdy,clr_rx_rdy;
@@ -57,7 +47,7 @@ module UART_wrapper(
 			flopped_byte <= bytee;
 	
 	//// FSM for control logic ////
-	typedef enum reg{BYTE1,BYTE2} state_t;
+	typedef enum reg{IDLE,BYTE2} state_t;
 	state_t state, nxt_state;
 	
 	// state flop with non blocking //
@@ -80,6 +70,7 @@ module UART_wrapper(
 			BYTE2: if(rx_rdy) begin
 					clr_rx_rdy = 1'b1;
 					cmd_rdy = 1'b1;
+					nxt_state = IDLE;
 					end
 			// default state : BYTE1 //
 			default: if (rx_rdy) begin

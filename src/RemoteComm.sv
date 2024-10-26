@@ -3,21 +3,20 @@
     Filename        : RemoteComm.sv
     Description     : This module takes a 16-bit command and sends it as two 8-bit bytes over UART 
 */
-
 `default_nettype none
 module RemoteComm(
-	input clk,    
-	input rst_n,
-	input snd_cmd,
-	input [15:0] cmd, // data inputs
-	input RX, //for UART when in receiving mode
-	output TX, // TX is a single bit being sent.
+	input wire clk,    
+	input wire rst_n,
+	input wire snd_cmd,
+	input wire [15:0] cmd, // data inputs
+	input wire RX, //for UART when in receiving mode
+	output wire TX, // TX is a single bit being sent.
 	output reg cmd_snt, // cmd_snt asserts high when the entire 16 bits have been transmitted. 
 	
 	//rx outputs 
-	output resp_rx_rdy,  
-	output [7:0] resp_rx_data,
-	input resp_clr_rx_rdy
+	output wire resp_rx_rdy,  
+	output wire [7:0] resp_rx_data,
+	input wire resp_clr_rx_rdy
 	);
 	
 
@@ -31,12 +30,10 @@ module RemoteComm(
 
 	logic set_cmd_snt;
 
-	assign tx_data = byte_sel ? cmd[15:0] : low_b //if byte_sel high - send high byte
+	assign tx_data = byte_sel ? cmd[15:0] : low_b; //if byte_sel high - send high byte
 												   // if byte sel low - send low byte from flop
 	
 	// UART inputs //
-	
-	
 	
 	
 	UART iUART(
@@ -95,8 +92,12 @@ module RemoteComm(
 			end
 
 			// default is BYTE1 //
-			default: if(snd_cmd) trmt = 1'b1;
+			default: if(snd_cmd) begin 
+						trmt = 1'b1;
+						nxt_state = HIGH_BYTE;
+			end
 
+		endcase
 	end
 
 		
