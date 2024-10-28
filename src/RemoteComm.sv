@@ -10,13 +10,12 @@ module RemoteComm(
 	input wire snd_cmd,
 	input wire [15:0] cmd, // data inputs
 	input wire RX, //for UART when in receiving mode
+	input wire resp_clr_rx_rdy,
 	output wire TX, // TX is a single bit being sent.
 	output reg cmd_snt, // cmd_snt asserts high when the entire 16 bits have been transmitted. 
-	
-	//rx outputs 
-	output wire resp_rx_rdy,  
-	output wire [7:0] resp_rx_data,
-	input wire resp_clr_rx_rdy
+	output wire resp_rx_rdy,    	//rx outputs 
+	output wire [7:0] resp_rx_data
+
 	);
 	
 
@@ -30,7 +29,7 @@ module RemoteComm(
 
 	logic set_cmd_snt;
 
-	assign tx_data = byte_sel ? cmd[15:0] : low_b; //if byte_sel high - send high byte
+	assign tx_data = byte_sel ? cmd[15:8] : low_b; //if byte_sel high - send high byte
 												   // if byte sel low - send low byte from flop
 	
 	// UART inputs //
@@ -81,14 +80,15 @@ module RemoteComm(
 
 		case (state)
 			HIGH_BYTE: if(tx_done) begin
-				//byte_sel = 1'b1; //uncommented case byte_sel is default high 
+				byte_sel = 1'b0; //uncommented case byte_sel is default high 
 				trmt = 1'b1;
 				nxt_state = LOW_BYTE;
 			end
 
 			LOW_BYTE: if(tx_done) begin
-				set_cmd_snt = 1'b0;
+				set_cmd_snt = 1'b1;
 				nxt_state = IDLE;
+	
 			end
 
 			// default is BYTE1 //

@@ -24,7 +24,7 @@ module UART_rx(clk,rst_n,RX,rx_data,clr_rdy,rdy);
   logic RX_ff,RX_2ff,RX_3ff;
   always_ff@(posedge clk, negedge rst_n)
     if (!rst_n)
-      {RX_ff,RX_2ff,RX_3ff} <= 1'b1; //async preset 
+      {RX_ff,RX_2ff,RX_3ff} <= 3'b111; //async preset 
     else
       {RX_ff,RX_2ff,RX_3ff} <= {RX,RX_ff,RX_2ff}; // chain the flops, creating 2 clk delay
   

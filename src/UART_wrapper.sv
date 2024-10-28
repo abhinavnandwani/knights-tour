@@ -9,14 +9,12 @@ module UART_wrapper(
 	input wire clk, //sync inputs 
 	input wire rst_n,
 	input wire RX,
-	output wire TX,
-
-	input wire clr_cmd_rdy, //indicating data is "consumed" by user
-	output reg cmd_rdy, //flag to indicate the 16 bits are ready to be consumed
-	output wire [15:0] cmd,
-	
 	input wire resp_trmt,
 	input wire [7:0] resp_tx_data,
+	input wire clr_cmd_rdy, //indicating data is "consumed" by user
+	output wire TX,
+	output reg cmd_rdy, //flag to indicate the 16 bits are ready to be consumed
+	output wire [15:0] cmd,
 	output wire resp_tx_done
 	);
 	
@@ -58,9 +56,10 @@ module UART_wrapper(
 			state <= nxt_state;
 	
 	// next state and output comb logic //
+	logic set_cmd_rdy;
 	always_comb begin
 		// default outputs //
-		cmd_rdy = 0;
+		set_cmd_rdy = 0;
 		clr_rx_rdy = 0;
 		byte_mux = 0;
 		nxt_state = state;
@@ -69,16 +68,28 @@ module UART_wrapper(
 		
 			BYTE2: if(rx_rdy) begin
 					clr_rx_rdy = 1'b1;
-					cmd_rdy = 1'b1;
+					set_cmd_rdy = 1'b1;
 					nxt_state = IDLE;
 					end
 			// default state : BYTE1 //
-			default: if (rx_rdy) begin
+			default: begin if (rx_rdy) begin
 						clr_rx_rdy = 1'b1;
 						byte_mux = 1'b1;
+						nxt_state = BYTE2;
 					end 
+			end
 		endcase
 	end
+
+	// SR flop for cmd_rdy //
+	always_ff@(posedge clk, negedge rst_n)
+		if (!rst_n)
+			cmd_rdy <= 1'b0;
+		else if (clr_cmd_rdy)
+			cmd_rdy <= 1'b0;
+		else if (set_cmd_rdy)
+			cmd_rdy <= 1'b1;
+
 
 endmodule
 `default_nettype wire
